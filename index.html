@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Federal Fire Service CBT Simulator</title>
+
+<style>
+  body { font-family: Arial, Helvetica, sans-serif; background: #f2f3f5; margin: 0; padding: 0; }
+  .container { max-width: 900px; margin: 30px auto; background: #fff; border-radius: 8px; padding: 25px 30px; box-shadow: 0 0 10px rgba(0,0,0,.1); }
+  h1 { text-align: center; color: #b30000; margin-top: 0; }
+  #timer { text-align: right; color: #d00; font-weight: bold; font-size: 18px; }
+  hr { border: none; height: 2px; background: #eee; margin: 15px 0; }
+  .question { font-size: 18px; margin-bottom: 10px; }
+  .options label { display: block; padding: 6px 10px; margin-bottom: 6px; background: #fafafa; border-radius: 5px; border: 1px solid #ddd; cursor: pointer; transition: 0.2s; }
+  .options label:hover { background: #f0f8ff; }
+  input[type=radio] { margin-right: 10px; }
+  .btns { display: flex; justify-content: space-between; margin-top: 25px; }
+  button { border: none; border-radius: 5px; padding: 10px 18px; font-size: 16px; cursor: pointer; }
+  #prevBtn { background: #6c757d; color: #fff; }
+  #nextBtn { background: #007bff; color: #fff; }
+  #submitBtn { background: #28a745; color: #fff; display: none; }
+  #result { text-align: center; font-size: 22px; font-weight: bold; margin-top: 40px; }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <h1>🇳🇬 Federal Fire Service CBT Mock Exam</h1>
+  <div id="timer">Time Left: 60:00</div>
+  <hr>
+
+  <div id="quiz"></div>
+
+  <div class="btns">
+    <button id="prevBtn" onclick="prevQuestion()">Previous</button>
+    <button id="nextBtn" onclick="nextQuestion()">Next</button>
+    <button id="submitBtn" onclick="submitQuiz()">Submit</button>
+  </div>
+
+  <div id="result"></div>
+</div>
+
+<script>
+let current = 0;
+let answers = [];
+let timeLeft = 60*60; // 60 minutes
+let timer;
+
+function showQuestion(index){
+  const q = quizData[index];
+  let html = "<div class='question'><b>Q"+(index+1)+".</b> "+q.q+"</div><div class='options'>";
+  q.o.forEach((opt,i)=>{
+    const checked = answers[index]===i?"checked":"";
+    html += "<label><input type='radio' name='q"+index+"' value='"+i+"' "+checked+" onchange='selectOption("+index+","+i+")'> "+opt+"</label>";
+  });
+  html += "</div>";
+  document.getElementById("quiz").innerHTML = html;
+  document.getElementById("prevBtn").style.display = index===0?"none":"inline-block";
+  document.getElementById("nextBtn").style.display = index===quizData.length-1?"none":"inline-block";
+  document.getElementById("submitBtn").style.display = index===quizData.length-1?"inline-block":"none";
+}
+
+function selectOption(qIndex,optIndex){ answers[qIndex]=optIndex; }
+function nextQuestion(){ if(current<quizData.length-1){current++;showQuestion(current);} }
+function prevQuestion(){ if(current>0){current--;showQuestion(current);} }
+
+function submitQuiz(){
+  clearInterval(timer);
+  let score = 0;
+  quizData.forEach((q,i)=>{ if(answers[i]===q.a) score++; });
+  const percent = ((score/quizData.length)*100).toFixed(2);
+
+  document.getElementById("quiz").style.display="none";
+  document.getElementById("prevBtn").style.display="none";
+  document.getElementById("nextBtn").style.display="none";
+  document.getElementById("submitBtn").style.display="none";
+  document.getElementById("timer").style.display="none";
+
+  document.getElementById("result").innerHTML = "✅ You scored <b>"+score+"</b> out of <b>"+quizData.length+"</b><br>Percentage: <b>"+percent+"%</b>";
+}
+
+function updateTimer(){
+  const minutes=Math.floor(timeLeft/60);
+  const seconds=timeLeft%60;
+  document.getElementById("timer").textContent="Time Left: "+minutes+":"+(seconds<10?"0":"")+seconds;
+  timeLeft--;
+  if(timeLeft<0) submitQuiz();
+}
+
+function startTimer(){ timer=setInterval(updateTimer,1000); }
+
+const quizData=[
+  // Your 100 questions go here (copy the quizData array you provided)
+  {q:"The Federal Fire Service operates under which ministry?",o:["Ministry of Defence","Ministry of Environment","Ministry of Interior","Ministry of Power"],a:2},
+  {q:"Who is the current President of Nigeria?",o:["Goodluck Jonathan","Bola Ahmed Tinubu","Muhammadu Buhari","Yemi Osinbajo"],a:1},
+  {q:"When did Nigeria gain independence?",o:["1960","1963","1957","1970"],a:0},
+  // ... (continue all 100 questions)
+  {q:"Emergency number for fire service in Nigeria —",o:["911","122","112","199"],a:2}
+];
+
+showQuestion(current);
+startTimer();
+</script>
+</body>
+</html>
